@@ -1,0 +1,35 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-gradient-to-br from-dark-900 via-dark-800 to-dark-900;
+    @apply text-gray-100;
+    @apply min-h-screen;
+    @apply font-sans;
+  }
+}
+
+@layer components {
+  .card-bike {
+    @apply bg-dark-800/50 backdrop-blur-sm border border-dark-700 rounded-xl p-4 shadow-lg;
+    @apply transition-all duration-300 hover:shadow-primary-500/20 hover:border-primary-500/50;
+  }
+  
+  .metric-value {
+    @apply text-2xl font-bold text-primary-400;
+  }
+  
+  .metric-label {
+    @apply text-xs text-gray-400 uppercase tracking-wider;
+  }
+  
+  .status-active {
+    @apply text-green-400 animate-pulse-slow;
+  }
+  
+  .status-inactive {
+    @apply text-gray-500;
+  }
+}
