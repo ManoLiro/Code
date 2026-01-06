@@ -62,15 +62,57 @@ def calculate_speed_from_power_and_cadence(power: float, cadence: float) -> floa
 async def receive_bike_data(data: BikeReading):
     """
     Endpoint para receber dados das bicicletas (ESP32)
+    Calcula instant_speed e total_distance a partir de instant_power e instant_cadence
     """
     device_name = data.device
+    current_time = time.time()
     
-    # Atualiza os dados da bike com timestamp
+    # Inicializa estado da bike se não existe
+    if device_name not in bike_state:
+        bike_state[device_name] = {
+            "total_distance": 0.0,  # em metros
+            "total_energy": 0.0,    # em kJ
+            "elapsed_time": 0.0,    # em segundos
+            "last_timestamp": current_time
+        }
+    
+    # Extrai dados recebidos
+    reading = data.reading
+    instant_power = reading.get("instant_power", 0)
+    instant_cadence = reading.get("instant_cadence", 0)
+    
+    # Calcula velocidade baseada em power e cadence
+    instant_speed = calculate_speed_from_power_and_cadence(instant_power, instant_cadence)
+    
+    # Calcula tempo decorrido desde última leitura
+    time_delta = current_time - bike_state[device_name]["last_timestamp"]
+    
+    # Atualiza distância total (velocidade em km/h × tempo em horas × 1000 para metros)
+    if time_delta > 0:
+        distance_increment = (instant_speed * time_delta / 3600) * 1000
+        bike_state[device_name]["total_distance"] += distance_increment
+        
+        # Atualiza energia total (potência em W × tempo em s / 1000 para kJ)
+        energy_increment = instant_power * time_delta / 1000
+        bike_state[device_name]["total_energy"] += energy_increment
+        
+        # Atualiza tempo decorrido
+        bike_state[device_name]["elapsed_time"] += time_delta
+    
+    bike_state[device_name]["last_timestamp"] = current_time
+    
+    # Atualiza os dados da bike com valores calculados
     bike_data[device_name] = {
         "device": device_name,
         "last_update": datetime.now().isoformat(),
         "timestamp": data.ts,
-        **data.reading
+        "instant_speed": instant_speed,  # Calculado
+        "instant_power": instant_power,
+        "instant_cadence": instant_cadence,
+        "total_distance": int(bike_state[device_name]["total_distance"]),  # Calculado e acumulado
+        "heart_rate": reading.get("heart_rate", 0),
+        "total_energy": int(bike_state[device_name]["total_energy"]),  # Calculado e acumulado
+        "elapsed_time": int(bike_state[device_name]["elapsed_time"])  # Acumulado
     }
     
     # Broadcast para todos os clientes WebSocket conectados
