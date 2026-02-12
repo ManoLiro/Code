@@ -1,6 +1,6 @@
 import BikeCard from './BikeCard'
 
-const BikeGrid = ({ bikes }) => {
+const BikeGrid = ({ bikes, assignments, onClickBike }) => {
   const bikeArray = Object.values(bikes)
 
   if (bikeArray.length === 0) {
@@ -22,7 +22,12 @@ const BikeGrid = ({ bikes }) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
       {bikeArray.map((bike) => (
-        <BikeCard key={bike.device} bike={bike} />
+        <BikeCard
+          key={bike.device}
+          bike={bike}
+          assignment={assignments?.[bike.device] || null}
+          onClickBike={onClickBike}
+        />
       ))}
     </div>
   )

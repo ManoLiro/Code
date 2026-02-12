@@ -37,19 +37,14 @@ BIKES = [
 ]
 
 def generate_bike_data(bike_name):
-    """Gera dados aleatórios realistas para uma bike"""
+    """Gera dados aleatórios realistas para uma bike (apenas cadência e potência)"""
     return {
         "ts": time.time(),
         "src": "simulator",
         "device": bike_name,
         "reading": {
-            "instant_speed": round(random.uniform(15.0, 35.0), 1),
             "instant_power": random.randint(80, 250),
             "instant_cadence": round(random.uniform(60.0, 100.0), 1),
-            "total_distance": random.randint(1000, 20000),
-            "heart_rate": random.randint(110, 170),
-            "total_energy": random.randint(50, 500),
-            "elapsed_time": random.randint(60, 3600)
         }
     }
 
@@ -60,8 +55,8 @@ def send_bike_data(bike_name):
         response = requests.post(BACKEND_URL, json=data, timeout=2)
         
         if response.status_code == 200:
-            print(f"✅ {bike_name}: Velocidade={data['reading']['instant_speed']} km/h, "
-                  f"Potência={data['reading']['instant_power']} W")
+            print(f"✅ {bike_name}: Potência={data['reading']['instant_power']} W, "
+                  f"Cadência={data['reading']['instant_cadence']} rpm")
         else:
             print(f"❌ {bike_name}: Erro {response.status_code}")
     except requests.exceptions.RequestException as e:
